@@ -1,12 +1,16 @@
 #!/bin/bash
+scriptdir=
+echo $0
+echo $(basename $0)
+echo $(dirname $0)
 
-help () 
+function help
 {
  echo -e 'usage:
   POSTor config -e default-environment.sh'
 }
 
-config ()
+function configuration
 {
 	shift
   case $1 in
@@ -15,6 +19,10 @@ config ()
   esac
 }
 
+function deal
+{
+  
+}
 
 #main ##################
 if [ ! -n "$1" ]
@@ -26,9 +34,11 @@ do
 case $1 in
 	-h | --help) help ;;
 	config) 
-		config $@ 
+		configuration $@ 
 		shift $# ;;
-	*) help ;;
+	*)
+	 deal $@
+    shift $#	;;
 esac
 shift
 done
