@@ -1,3 +1,7 @@
-a=(1 2 3)
-echo ${#a[*]}
-echo $b
+#!/bin/bash
+a="dd"
+var="echo sdf"
+if [ 2 -gt 1 ];then
+	var=$var$a
+fi
+$var

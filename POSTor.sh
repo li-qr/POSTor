@@ -6,8 +6,6 @@ currdir=$(pwd)
 scriptdir=$(cd $(dirname $0);pwd)
 $(cd $currdir)
 
-
-
 function help
 {
  echo -e 'usage:
@@ -23,12 +21,40 @@ function configuration
   esac
 }
 
+function curll
+{
+	local cmd="curl"
+	if [ -n "$header" ];then
+	  cmd="$cmd -H $header"
+	fi
+	if [ -n "$method" ];then
+		cmd="$cmd -X $method"
+	fi 
+	if [ -n "$request" ];then
+	  cmd="$cmd -d '$request'"
+	fi
+	if [ -n "$url" ];then
+		cmd="$cmd $url"
+	else
+		echo "no url"
+		exit 1
+	fi
+		
+	$cmd
+}
+
+function sourceenv
+{
+	source "$scriptdir$requestdir/$1"
+	curll
+}
+
 function dealbasic
 {
 	local var1=0
 	for var2 in $(find "$scriptdir$requestdir" -name $(echo $1 | sed -e 's/./*&/g' -e 's/$/&*/g'))
 	do
-		local files[$var1]=$(basename "$var2")
+		local files[$var1]=${var2:${#scriptdir}+${#requestdir}+1}
 		 (( var1++ ))
 	done
   if [ ${#files[@]} -eq 0 ] ;then
@@ -41,7 +67,7 @@ function dealbasic
 		do
 			if [ $REPLY -gt 0 ] 2>/dev/null ;then 
   			if [ $REPLY -le ${#files[@]} ];then
-					echo ${files[$REPLY-1]}
+					sourceenv ${files[$REPLY-1]}
 				 break;
 				fi
 			fi
