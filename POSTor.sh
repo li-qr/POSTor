@@ -23,24 +23,26 @@ function configuration
 
 function curll
 {
-	local cmd="curl"
+	local cmd=()
+	local i=0
 	if [ -n "$header" ];then
-	  cmd="$cmd -H $header"
+		cmd[i]="-H";((i++));cmd[i]="$header";((i++))
 	fi
 	if [ -n "$method" ];then
-		cmd="$cmd -X $method"
+		cmd[i]="-X";((i++));cmd[i]="$method";((i++))
 	fi 
 	if [ -n "$request" ];then
-	  cmd="$cmd -d '$request'"
+		cmd[i]="-d";((i++));cmd[i]="$request";((i++))
 	fi
 	if [ -n "$url" ];then
-		cmd="$cmd $url"
+		cmd[i]="$url"
 	else
 		echo "no url"
 		exit 1
 	fi
-		
-	$cmd
+	curl "${cmd[@]}" > tres
+	echo $tres
+#	echo $tres > $scriptdir/last
 }
 
 function sourceenv
