@@ -18,7 +18,6 @@ function help
 
 function configuration
 {
-    shift
     case $1 in
         -f | --default-env) echo "default" ;;
         *) help ;;
@@ -26,7 +25,16 @@ function configuration
 }
 function puthis
 {
-    local his1="########"`date`"############"
+	cd "$hisdir"
+    local fs=`find . -name "*-his.sh" | sort -t '-' -nrk 1.3`
+	if [ -n "$fs" ];then
+    local fsl=${fs:2:6}
+    (( fsl++ ))
+	else
+	local fsl=000000
+	fi
+	cd $currdir
+    local his1="\n##$(printf "%06d" $fsl)######"`date`"############\n"
     local his2="#!/bin/bash"
     if [ -n "$method" ];then
         his1="$his1\nmethod: $method"
@@ -42,22 +50,13 @@ function puthis
     fi
     if [ -n "$request" ];then
         his1="$his1\nrequest:\n$request"
-        his2="$his2\nrequest=\'$request\'"
+        his2="$his2\nrequest='$request'"
     fi
     if [ -n "$response"];then
         his1="$his1\nresponse:\n$1"
     fi
     echo -e "$his1" >> "$hisfile"
-    cd "$hisdir"
-    local fs=`find . -name "*-his.sh" | sort -t '-' -nrk 1.3`
-	if [ -n "$fs" ];then
-    local fsl=${fs:2:6}
-    (( fsl++ ))
-	else
-	local fsl=000000
-	fi
-	echo -e "$his2" > "$hisdir/$fsl-his.sh"
-	cd $currdir
+    echo -e "$his2" > "$hisdir/$(printf "%06d" $fsl)-his.sh"
 }
 
 function putlast
@@ -128,7 +127,6 @@ function dealbasic
 
 function single
 {
-    shift
     while [ -n "$1" ]
     do
         case $1 in
@@ -140,6 +138,26 @@ function single
             shift $# ;;
         esac
     done
+}
+
+function last
+{
+	if [ -z $1 ] || [ "$1" = "--vim" ];then
+		echo "1 $1"
+		>&2 vim $lastfile
+	elif [ "$1" = "--less" ];then
+		echo "2 $1"
+		>&2 less $lastfile
+	fi
+}
+
+function histories
+{
+	if [ -z $1 ] || [ "$1" = "--vim" ];then
+		>&2 vim $hisfile
+	elif [ "$1" = "--less" ];then
+		>&2 less $hisfile
+	fi
 }
 
 #main ##################
@@ -158,16 +176,20 @@ else
         case $1 in
             -h | --help) help ;;
             config)
+				shift
                 configuration $@
             shift $# ;;
             single)
+                shift
                 single $@
             shift $# ;;
             last)
-                >&2 vim $lastfile
+				shift
+				last $@
             shift $# ;;
-            histories)
-                >&2 vim $hisfile
+            his)
+				shift
+				histories $@
             shift $# ;;
             *)
             help ;;
