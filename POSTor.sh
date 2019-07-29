@@ -19,21 +19,26 @@ function help
 function configuration
 {
     case $1 in
-        -f | --default-env) echo "default" ;;
+        defaultenv) 
+		>&2 vim $envdir/default.sh 
+		;;
+		list)
+		
+		;;
         *) help ;;
     esac
 }
 function puthis
 {
-	cd "$hisdir"
+    cd "$hisdir"
     local fs=`find . -name "*-his.sh" | sort -t '-' -nrk 1.3`
-	if [ -n "$fs" ];then
-    local fsl=${fs:2:6}
-    (( fsl++ ))
-	else
-	local fsl=000000
-	fi
-	cd $currdir
+    if [ -n "$fs" ];then
+        local fsl=${fs:2:6}
+        (( fsl++ ))
+    else
+        local fsl=000000
+    fi
+    cd $currdir
     local his1="\n##$(printf "%06d" $fsl)######"`date`"############\n"
     local his2="#!/bin/bash"
     if [ -n "$method" ];then
@@ -142,22 +147,32 @@ function single
 
 function last
 {
-	if [ -z $1 ] || [ "$1" = "--vim" ];then
-		echo "1 $1"
-		>&2 vim $lastfile
-	elif [ "$1" = "--less" ];then
-		echo "2 $1"
-		>&2 less $lastfile
-	fi
+    if [ -z $1 ] || [ "$1" = "--vim" ];then
+        echo "1 $1"
+        >&2 vim $lastfile
+        elif [ "$1" = "--less" ];then
+        echo "2 $1"
+        >&2 less $lastfile
+    fi
 }
 
 function histories
 {
-	if [ -z $1 ] || [ "$1" = "--vim" ];then
-		>&2 vim $hisfile
-	elif [ "$1" = "--less" ];then
-		>&2 less $hisfile
-	fi
+    if [ -z $1 ] || [ "$1" = "--vim" ];then
+        >&2 vim $hisfile
+        elif [ "$1" = "--less" ];then
+        >&2 less $hisfile
+    fi
+    if [ ! "$1" -gt 0 ] 2>/dev/null ;then
+        echo "请输入历史编号"
+    else
+        if [ -e "$hisdir/$(printf "%06d" $1)-his.sh" ]; then
+            sourceenv "../histories/$(printf "%06d" $1)-his.sh"
+            curlbox
+        else
+            echo "历史$(printf "%06d" $1)-his.sh不存在"
+        fi
+    fi
 }
 
 #main ##################
@@ -176,7 +191,7 @@ else
         case $1 in
             -h | --help) help ;;
             config)
-				shift
+                shift
                 configuration $@
             shift $# ;;
             single)
@@ -184,12 +199,12 @@ else
                 single $@
             shift $# ;;
             last)
-				shift
-				last $@
+                shift
+                last $@
             shift $# ;;
             his)
-				shift
-				histories $@
+                shift
+                histories $@
             shift $# ;;
             *)
             help ;;
