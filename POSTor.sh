@@ -16,14 +16,43 @@ function help
     POSTor config -e default-environment.sh'
 }
 
+function executeall
+{
+	local valid=("vim" "less" "tail" "more" "cat")
+	for cmd in $valid
+	do
+		if [ "$1" = $cmd ];then
+			local var1="1"
+			local var2=$1
+			echo $* | >&2 xargs -o $var2
+		fi
+	done
+	if [ -z $var1 ];then
+		echo "unsupported command $1"
+		exit 1
+	fi
+}
+
 function configuration
 {
     case $1 in
         defaultenv) 
 		>&2 vim $envdir/default.sh 
 		;;
-		list)
-		
+			list)
+			if [ -n $2 ];then
+				if [ "$2" = "--more"];then
+					local more="1"
+				fi
+			fi
+			var2=""
+			for var1 in "$envdir/*"
+			do
+				var2="$var2$var1\n"
+				if [ -n $2 ];then
+					cat $var1 >> 
+				fi
+			done
 		;;
         *) help ;;
     esac
@@ -162,6 +191,7 @@ function histories
         >&2 vim $hisfile
         elif [ "$1" = "--less" ];then
         >&2 less $hisfile
+			elif [ "$1" = "--tail" ]
     fi
     if [ ! "$1" -gt 0 ] 2>/dev/null ;then
         echo "请输入历史编号"
