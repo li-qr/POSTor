@@ -20,8 +20,8 @@ function help() {
 
 function executeall() {
     local valid=("vim" "less" "tail" "more" "cat")
-    for cmd in $valid; do
-        if [ "$1" = $cmd ]; then
+    for cmd in ${valid[*]}; do
+        if [ "$1" = "$cmd" ]; then
             local var1="1"
             local var2=$1
             shift
@@ -34,24 +34,31 @@ function executeall() {
     fi
 }
 
-function configuration() { 
+function configuration() {
     case $1 in
     defaultenv)
-        vim >&2 $envdir/default.sh
+        if [ -n "$2" ] && [ "$2"="-e" ]; then
+            executeall vim "$envdir/default.sh"
+        else
+            executeall less "$envdir/default.sh"
+        fi
         ;;
     list)
-        if [ -n $2 ]; then
-            if [ "$2" = "--more"]; then
-                local more="1"
-            fi
+        if [ -n $2 ] && [ $2 = "--more" ]; then
+            local more="1"
         fi
         var2=""
-        for var1 in "$envdir/*"; do
+        for var1 in "$envdir"/*; do
             var2="$var2$var1\n"
-            if [ -n $2 ]; then
-            #    cat $var1 >>
+            if [ -n $more ]; then
+                while read var0; do
+                    if [ ! ${var0:0:1} = "#" ]; then
+                        var2="$var2\t${var0:7}\n"
+                    fi
+                done <$var1
             fi
         done
+        echo -e $var2
         ;;
     *) help ;;
     esac
@@ -193,6 +200,7 @@ function histories() {
     elif [ "$1" = "--less" ]; then
         less >&2 $hisfile
     elif [ "$1" = "--tail" ]; then
+        echo ""
     fi
     if [ ! "$1" -gt 0 ] 2>/dev/null; then
         echo "请输入历史编号"
