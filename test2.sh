@@ -1,0 +1,2 @@
+. ./enviroments/default.sh
+
