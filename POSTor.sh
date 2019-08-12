@@ -10,7 +10,7 @@ $(cd $currdir)
 envdir="$scriptdir/enviroments"
 hisdir="$scriptdir/histories"
 hisfile="$hisdir/history"
-lastfile="$scriptdir/last"
+lastfile="$hisdir/last"
 requestdir="$scriptdir/requests"
 
 function help() {
