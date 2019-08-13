@@ -15,7 +15,7 @@ requestdir="$scriptdir/requests"
 
 function help() {
     echo -e 'usage:
-    POSTor config -e default-environment.sh'
+    POSTor config -e default-environment'
 }
 
 function executeall() {
@@ -36,14 +36,25 @@ function executeall() {
 
 function configuration() {
     case $1 in
+    addenv)
+        if [ -z "$2" ]; then
+            echo "请指定环境名"
+            exit 1
+        fi
+        tfname=$envdir/"$2"
+        touch "$tfname"
+        echo -e '#!/bin/bash
+#key=value' >"$tfname"
+        executeall vim "$tfname"
+        ;;
     defaultenv)
         if [ -n "$2" ] && [ "$2"="-e" ]; then
-            executeall vim "$envdir/default.sh"
+            executeall vim "$envdir/default"
         else
-            executeall less "$envdir/default.sh"
+            executeall less "$envdir/default"
         fi
         ;;
-    list)
+    listenv)
         if [ -n "$2" ] && [ $2 = "-m" ]; then
             local more="1"
         fi
@@ -65,10 +76,10 @@ function configuration() {
 }
 function puthis() {
     cd "$hisdir"
-    local fs=$(find . -name "*-his.sh" | sort -t '-' -nrk 1.3)
+    local fs=$(find . -name "*-his" | sort -t '-' -nrk 1.3)
     if [ -n "$fs" ]; then
         local fsl=$((10#${fs:2:6}))
-        (( fsl ++ ))
+        ((fsl++))
     else
         local fsl=000001
     fi
@@ -95,7 +106,7 @@ function puthis() {
         his1="$his1\nresponse:\n$1"
     fi
     echo -e "$his1" >>"$hisfile"
-    echo -e "$his2" >"$hisdir/$(printf "%06d" $fsl)-his.sh"
+    echo -e "$his2" >"$hisdir/$(printf "%06d" $fsl)-his"
 }
 
 function putlast() {
@@ -138,7 +149,7 @@ function curlbox() {
     puthis $tres
 }
 
-function sourceenv() {
+function sourcepara() {
     source "$requestdir/$1"
 }
 
@@ -152,14 +163,14 @@ function dealbasic() {
         echo "没有找到匹配请求"
         exit 0
     elif [ ${#files[@]} -eq 1 ]; then
-        sourceenv ${files[0]}
+        sourcepara ${files[0]}
         curlbox
     elif [ ${#files[@]} -ge 2 ]; then
         PS3="选择一个请求处理："
         select option in ${files[*]}; do
             if [ $REPLY -gt 0 ] 2>/dev/null; then
                 if [ $REPLY -le ${#files[@]} ]; then
-                    sourceenv ${files[$REPLY - 1]}
+                    sourcepara ${files[$REPLY - 1]}
                     curlbox
                     break
                 fi
@@ -177,7 +188,7 @@ function single() {
             shift
             ;;
         *)
-            dealbasic $@
+            dealbasic $@ &
             shift $#
             ;;
         esac
@@ -188,17 +199,17 @@ function last() {
     if [ -n "$1" ]; then
         executeall $* ${lastfile}
     else
-        executeall less ${lastfile}
+        executeall cat ${lastfile}
     fi
 }
 
 function histories() {
     if [ "$1" -gt 0 ] 2>/dev/null; then
-        if [ -e "$hisdir/$(printf "%06d" $1)-his.sh" ]; then
-            sourceenv "../histories/$(printf "%06d" $1)-his.sh"
+        if [ -e "$hisdir/$(printf "%06d" $1)-his" ]; then
+            sourcepara "../histories/$(printf "%06d" $1)-his"
             curlbox
         else
-            echo "历史$(printf "%06d" $1)-his.sh不存在"
+            echo "历史$(printf "%06d" $1)-his不存在"
         fi
     elif [ -n "$1" ]; then
         executeall $* ${hisfile}
@@ -209,8 +220,8 @@ function histories() {
 
 #main ##################
 
-if [ -f "$envdir/default.sh" ]; then
-    source "$envdir/default.sh"
+if [ -f "$envdir/default" ]; then
+    source "$envdir/default"
 fi
 
 if [ ! -n "$1" ]; then
