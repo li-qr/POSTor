@@ -1,0 +1,23 @@
+#!/bin/bash
+
+######
+#本配置文件局限与以下变量
+#除了标记必须的变量其他都可以没有
+#初始化当前目录为request目录：POSTor init
+#发起一个请求：POSTor single [options...] %请求%
+######
+
+
+#请求地址 （必须）
+#url="http://$address:8088/path1/path2"
+
+#方法
+#method="POST"
+
+#请求头信息
+#header="content-type:application/json"
+
+#请求参数
+#request='{
+#"id": 1357
+#}'

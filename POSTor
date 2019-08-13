@@ -7,11 +7,19 @@ scriptdir=$(
     pwd
 )
 $(cd $currdir)
-envdir="$scriptdir/enviroments"
-hisdir="$scriptdir/histories"
+home="~"
+mydir="$home/.postor"
+#
+envdir="$mydir/enviroments"
+hisdir="$mydir/histories"
 hisfile="$hisdir/history"
 lastfile="$hisdir/last"
-requestdir="$scriptdir/requests"
+configfile="$mydir/config.POSTor"
+reqdir="$mydir/requests"
+templdir="$scriptdir/template"
+envtempl="$templdir/envtempl"
+reqtempl="$templdir/requesttempl"
+defaultenv="$envdir/default"
 
 function help() {
     echo -e 'usage:
@@ -43,15 +51,16 @@ function configuration() {
         fi
         tfname=$envdir/"$2"
         touch "$tfname"
-        echo -e '#!/bin/bash
+        cp "$envtempl" "$tfname"
+#        echo -e '#!/bin/bash
 #key=value' >"$tfname"
         executeall vim "$tfname"
         ;;
     defaultenv)
         if [ -n "$2" ] && [ "$2"="-e" ]; then
-            executeall vim "$envdir/default"
+            executeall vim "$defaultenv"
         else
-            executeall less "$envdir/default"
+            executeall less "$defaultenv"
         fi
         ;;
     listenv)
@@ -150,13 +159,13 @@ function curlbox() {
 }
 
 function sourcepara() {
-    source "$requestdir/$1"
+    source "$reqdir/$1"
 }
 
 function dealbasic() {
     local var1=0
-    for var2 in $(find "$requestdir" -name $(echo $1 | sed -e 's/./*&/g' -e 's/$/&*/g')); do
-        local files[$var1]=${var2:${#requestdir}+1}
+    for var2 in $(find "$reqdir" -name $(echo $1 | sed -e 's/./*&/g' -e 's/$/&*/g')); do
+        local files[$var1]=${var2:${#reqdir}+1}
         ((var1++))
     done
     if [ ${#files[@]} -eq 0 ]; then
@@ -220,8 +229,26 @@ function histories() {
 
 #main ##################
 
-if [ -f "$envdir/default" ]; then
-    source "$envdir/default"
+if [ -f "$defaultenv" ]; then
+    source "$defaultenv"
+fi
+
+if [ ! -d "$hisdir" ];then
+    mkdir -p "$hisdir"
+fi
+cd "$HOME/.vim"
+echo "`pwd`"
+# if [ ! -d "$envdir" ];then
+#     echo "sdf"
+#     mkdir -p "$envdir"
+#     cp "$envtempl" "$defaultenv"
+# fi
+
+if [ -f "$configfile" ];then
+    source "$configfile"
+    if [ -n "$requestdir" ];then
+        reqdir="$requestdir"
+    fi
 fi
 
 if [ ! -n "$1" ]; then
