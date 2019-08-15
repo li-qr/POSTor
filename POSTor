@@ -6,8 +6,11 @@ scriptdir=$(
     cd $(dirname $0)
     pwd
 )
+home=$(
+    cd ~
+    pwd
+)
 $(cd $currdir)
-home="~"
 mydir="$home/.postor"
 #
 envdir="$mydir/enviroments"
@@ -229,6 +232,13 @@ function histories() {
 
 #main ##################
 
+if [ -f "$configfile" ];then
+    source "$configfile"
+    if [ -n "$requestdir" ];then
+       reqdir="$requestdir"
+    fi
+fi
+
 if [ -f "$defaultenv" ]; then
     source "$defaultenv"
 fi
@@ -236,20 +246,17 @@ fi
 if [ ! -d "$hisdir" ];then
     mkdir -p "$hisdir"
 fi
-cd "$HOME/.vim"
-echo "`pwd`"
-# if [ ! -d "$envdir" ];then
-#     echo "sdf"
-#     mkdir -p "$envdir"
-#     cp "$envtempl" "$defaultenv"
-# fi
 
-if [ -f "$configfile" ];then
-    source "$configfile"
-    if [ -n "$requestdir" ];then
-        reqdir="$requestdir"
-    fi
+if [ ! -d "$reqdir" ];then
+    mkdir -p "$reqdir"
+    cp "$reqtempl" "$reqdir/templ"
 fi
+
+if [ ! -d "$envdir" ];then
+    mkdir -p "$envdir"
+    cp "$envtempl" "$defaultenv"
+fi
+
 
 if [ ! -n "$1" ]; then
     help
