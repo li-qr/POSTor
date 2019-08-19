@@ -47,43 +47,52 @@ function executeall() {
 
 function configuration() {
     case $1 in
-    addenv)
-        if [ -z "$2" ]; then
-            echo "请指定环境名"
-            exit 1
-        fi
-        tfname=$envdir/"$2"
-        touch "$tfname"
-        cp "$envtempl" "$tfname"
-#        echo -e '#!/bin/bash
-#key=value' >"$tfname"
-        executeall vim "$tfname"
-        ;;
-    defaultenv)
-        if [ -n "$2" ] && [ "$2"="-e" ]; then
-            executeall vim "$defaultenv"
-        else
-            executeall less "$defaultenv"
-        fi
-        ;;
-    listenv)
-        if [ -n "$2" ] && [ $2 = "-m" ]; then
-            local more="1"
-        fi
-        var2=""
-        for var1 in "$envdir"/*; do
-            var2="$var2$var1\n"
-            if [ -n "$more" ]; then
-                while read var0; do
-                    if [ ! "${var0:0:1}" = "#" ]; then
-                        var2="$var2\t${var0:7}\n"
-                    fi
-                done <$var1
+    env)
+        shift
+        case $1 in
+        -a | --add)
+            if [ -z "$2" ]; then
+                echo "请指定环境名"
+                exit 1
             fi
-        done
-        echo -e $var2
+            tfname=$envdir/"$2"
+            touch "$tfname"
+            cp "$envtempl" "$tfname"
+            executeall vim "$tfname"
+            ;;
+        -d | --default)
+            if [ -n "$2" ] && [ "$2"="-e" ]; then
+                executeall vim "$defaultenv"
+            else
+                executeall less "$defaultenv"
+            fi
+            ;;
+        -l | --list)
+            if [ -n "$2" ] && [ $2 = "-m" ]; then
+                local more="1"
+            fi
+            var2=""
+            for var1 in "$envdir"/*; do
+                var2="$var2$var1\n"
+                if [ -n "$more" ]; then
+                    while read var0; do
+                        if [ ! "${var0:0:1}" = "#" ]; then
+                            var2="$var2\t${var0:7}\n"
+                        fi
+                    done <$var1
+                fi
+            done
+            echo -e $var2
+            ;;
+         -D | --delete)
+            if [ -z "$2" ];then
+             help
+             else
+             
+            fi
+        *) help ;;
+        esac
         ;;
-    *) help ;;
     esac
 }
 function puthis() {
@@ -232,10 +241,10 @@ function histories() {
 
 #main ##################
 
-if [ -f "$configfile" ];then
+if [ -f "$configfile" ]; then
     source "$configfile"
-    if [ -n "$requestdir" ];then
-       reqdir="$requestdir"
+    if [ -n "$requestdir" ]; then
+        reqdir="$requestdir"
     fi
 fi
 
@@ -243,20 +252,19 @@ if [ -f "$defaultenv" ]; then
     source "$defaultenv"
 fi
 
-if [ ! -d "$hisdir" ];then
+if [ ! -d "$hisdir" ]; then
     mkdir -p "$hisdir"
 fi
 
-if [ ! -d "$reqdir" ];then
+if [ ! -d "$reqdir" ]; then
     mkdir -p "$reqdir"
     cp "$reqtempl" "$reqdir/templ"
 fi
 
-if [ ! -d "$envdir" ];then
+if [ ! -d "$envdir" ]; then
     mkdir -p "$envdir"
     cp "$envtempl" "$defaultenv"
 fi
-
 
 if [ ! -n "$1" ]; then
     help
