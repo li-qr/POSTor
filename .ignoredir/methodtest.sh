@@ -7,7 +7,7 @@ function a() {
 export -f a
 
 function b() {
-  echo "sdf" |	xargs -I {} bash -c "$1 \"{}\""
+  $1 sdf
 }
 
 b a

@@ -26,7 +26,7 @@ defaultenv="$envdir/default"
 
 function help() {
     echo -e 'usage:
-    POSTor config -e default-environment'
+    POSTor'
 }
 
 function executeall() {
@@ -45,6 +45,19 @@ function executeall() {
     fi
 }
 
+function deletefile() {
+    read -n 1 -p "确定删除环境 $1?(y/n):" var0
+    case $var0 in
+    y | Y)
+        rm -f "$envdir/$1"
+        echo -e "\n已删除"
+        ;;
+    *)
+        echo -e "\n"
+        ;;
+    esac
+}
+
 function configuration() {
     case $1 in
     env)
@@ -60,15 +73,15 @@ function configuration() {
             cp "$envtempl" "$tfname"
             executeall vim "$tfname"
             ;;
-        -d | --default)
-            if [ -n "$2" ] && [ "$2"="-e" ]; then
+        -d | --default | -de)
+            if [ -n "$2" -a $2="-e" ] || [ $1 = "-de" ]; then
                 executeall vim "$defaultenv"
             else
                 executeall less "$defaultenv"
             fi
             ;;
-        -l | --list)
-            if [ -n "$2" ] && [ $2 = "-m" ]; then
+        -l | --list | -lm)
+            if [ -n "$2" -a $2="-m" ] || [ $1 = "-lm" ]; then
                 local more="1"
             fi
             var2=""
@@ -88,7 +101,7 @@ function configuration() {
             if [ -z "$2" ]; then
                 help
             else
-                echo ""
+                fileselector deletefile $envdir $2
             fi
             ;;
         *) help ;;
@@ -181,10 +194,6 @@ function dealbasic() {
 }
 
 function fileselector() {
-    export -f "$1"
-    export -f sourcepara
-    export -f curlbox
-    export reqdir
     local var1=0
     for var2 in $(find "$2" -name $(echo $3 | sed -e 's/./*&/g' -e 's/$/&*/g')); do
         local files[$var1]=${var2:${#2}+1}
@@ -194,13 +203,13 @@ function fileselector() {
         echo "没有找到匹配请求"
         exit 0
     elif [ ${#files[@]} -eq 1 ]; then
-        echo "${files[0]}" | xargs -I {} bash -c "$1 \"{}\""
+        $1 "${files[0]}"
     elif [ ${#files[@]} -ge 2 ]; then
         PS3="选择一个请求处理："
         select option in ${files[*]}; do
             if [ $REPLY -gt 0 ] 2>/dev/null; then
                 if [ $REPLY -le ${#files[@]} ]; then
-                    echo "${files[$REPLY - 1]}" | xargs -I {} bash -c "$1 \"{}\""
+                    $1 "${files[$REPLY - 1]}"
                     break
                 fi
             fi
@@ -217,7 +226,7 @@ function single() {
             shift
             ;;
         *)
-            fileselector dealbasic $reqdir $@ &
+            fileselector dealbasic $reqdir $@
             shift $#
             ;;
         esac
@@ -247,33 +256,40 @@ function histories() {
     fi
 }
 
+function readconfig() {
+    if [ -f "$configfile" ]; then
+        source "$configfile"
+        if [ -n "$requestdir" ]; then
+            reqdir="$requestdir"
+        fi
+    fi
+}
+
+function init() {
+    if [ -f "$defaultenv" ]; then
+        source "$defaultenv"
+    fi
+
+    if [ ! -d "$hisdir" ]; then
+        mkdir -p "$hisdir"
+    fi
+
+    if [ ! -d "$reqdir" ]; then
+        mkdir -p "$reqdir"
+        cp "$reqtempl" "$reqdir/templ"
+    fi
+
+    if [ ! -d "$envdir" ]; then
+        mkdir -p "$envdir"
+        cp "$envtempl" "$defaultenv"
+    fi
+}
+
 #main ##################
 
-if [ -f "$configfile" ]; then
-    source "$configfile"
-    if [ -n "$requestdir" ]; then
-        reqdir="$requestdir"
-    fi
-fi
+readconfig
 
-if [ -f "$defaultenv" ]; then
-    source "$defaultenv"
-fi
-
-if [ ! -d "$hisdir" ]; then
-    mkdir -p "$hisdir"
-fi
-
-if [ ! -d "$reqdir" ]; then
-    mkdir -p "$reqdir"
-    cp "$reqtempl" "$reqdir/templ"
-fi
-
-if [ ! -d "$envdir" ]; then
-    mkdir -p "$envdir"
-    cp "$envtempl" "$defaultenv"
-fi
-
+init
 
 if [ ! -n "$1" ]; then
     help
