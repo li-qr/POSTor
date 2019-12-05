@@ -15,6 +15,7 @@ mydir="$home/.postor"
 #
 envdir="$mydir/enviroments"
 hisdir="$mydir/histories"
+hisseqdir="$hisdir/seq"
 hisfile="$hisdir/history"
 lastfile="$hisdir/last"
 configfile="$mydir/config.POSTor"
@@ -110,7 +111,7 @@ function configuration() {
     esac
 }
 function puthis() {
-    cd "$hisdir"
+    cd "$hisseqdir"
     local fs=$(find . -name "*-his" | sort -t '-' -nrk 1.3)
     if [ -n "$fs" ]; then
         local fsl=$((10#${fs:2:6}))
@@ -140,12 +141,18 @@ function puthis() {
     if [ -n "$response"]; then
         his1="$his1\nresponse:\n$1"
     fi
+    # sed -i "1i\$his1" "$hisfile"
     echo -e "$his1" >>"$hisfile"
-    echo -e "$his2" >"$hisdir/$(printf "%06d" $fsl)-his"
+    echo -e "$his2" >"$hisseqdir/$(printf "%06d" $fsl)-his"
 }
 
 function putlast() {
-    echo "$1" | tee "$lastfile"
+    echo "$1" | jq '.' >/dev/null 2>&1
+    if [ $? -gt 0 ]; then
+    echo "$1" > "$lastfile"
+    else
+    echo "$1" | jq '.' > "$lastfile".json
+    fi
 }
 
 function curlbox() {
@@ -180,8 +187,8 @@ function curlbox() {
         exit 1
     fi
     local tres=$(curl 2>/dev/null "${cmd[@]}")
-    putlast $tres
-    puthis $tres
+    putlast "$tres"
+    puthis "$tres"
 }
 
 function sourcepara() {
@@ -270,8 +277,8 @@ function init() {
         source "$defaultenv"
     fi
 
-    if [ ! -d "$hisdir" ]; then
-        mkdir -p "$hisdir"
+    if [ ! -d "$hisseqdir" ]; then
+        mkdir -p "$hisseqdir"
     fi
 
     if [ ! -d "$reqdir" ]; then
