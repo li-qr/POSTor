@@ -142,7 +142,12 @@ function puthis() {
         his1="$his1\nresponse:\n$1"
     fi
     # sed -i "1i\$his1" "$hisfile"
-    echo -e "$his1" >>"$hisfile"
+    tmpf=$(mktemp histemp.XXXXXX)
+    echo -e "$his1" > "$tmpf"
+    mv "$hisfile" "$hisfile".tmp
+    cat $tmpf "$hisfile".tmp > "$hisfile"
+    rm "$tmpf" "$hisfile".tmp
+
     echo -e "$his2" >"$hisseqdir/$(printf "%06d" $fsl)-his"
 }
 
