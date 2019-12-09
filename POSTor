@@ -152,12 +152,15 @@ function puthis() {
 }
 
 function putlast() {
-    echo "$1" | jq '.' >/dev/null 2>&1
-    if [ $? -gt 0 ]; then
-    echo "$1" > "$lastfile"
-    else
+    # echo "$1" | jq '.' >/dev/null 2>&1
+    # if [ $? -gt 0 ]; then
+    # echo "$1" > "$lastfile"
+    # else
+    # echo "$1" | jq '.' > "$lastfile"
+    # fi
+    echo -e "$1" > "$lastfile"
+    echo -e "$1" > "$lastfile".html
     echo "$1" | jq '.' > "$lastfile".json
-    fi
 }
 
 function curlbox() {
