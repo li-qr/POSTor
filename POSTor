@@ -59,55 +59,58 @@ function deletefile() {
     esac
 }
 
-function configuration() {
+function enviroments() {
     case $1 in
-    env)
-        shift
-        case $1 in
-        -a | --add)
-            if [ -z "$2" ]; then
-                echo "请指定环境名"
-                exit 1
-            fi
-            tfname=$envdir/"$2"
-            touch "$tfname"
-            cp "$envtempl" "$tfname"
-            executeall vim "$tfname"
-            ;;
-        -d | --default | -de)
-            if [ -n "$2" -a $2="-e" ] || [ $1 = "-de" ]; then
-                executeall vim "$defaultenv"
-            else
-                executeall less "$defaultenv"
-            fi
-            ;;
-        -l | --list | -lm)
-            if [ -n "$2" -a $2="-m" ] || [ $1 = "-lm" ]; then
-                local more="1"
-            fi
-            var2=""
-            for var1 in "$envdir"/*; do
-                var2="$var2$var1\n"
-                if [ -n "$more" ]; then
-                    while read var0; do
-                        if [ ! "${var0:0:1}" = "#" ]; then
-                            var2="$var2\t${var0:7}\n"
-                        fi
-                    done <$var1
-                fi
-            done
-            echo -e $var2
-            ;;
-        -D | --delete)
-            if [ -z "$2" ]; then
-                help
-            else
-                fileselector deletefile $envdir $2
-            fi
-            ;;
-        *) help ;;
-        esac
+    -a | --add)
+        if [ -z "$2" ]; then
+            echo "请指定环境名"
+            exit 1
+        fi
+        tfname=$envdir/"$2"
+        touch "$tfname"
+        cp "$envtempl" "$tfname"
+        executeall vim "$tfname"
         ;;
+    -d | --default | -de)
+        if [ -n "$2" -a $2="-e" ] || [ $1 = "-de" ]; then
+            executeall vim "$defaultenv"
+        else
+            executeall less "$defaultenv"
+        fi
+        ;;
+    -l | --list | -lm)
+        if [ -n "$2" -a $2="-m" ] || [ $1 = "-lm" ]; then
+            local more="1"
+        fi
+        var2=""
+        for var1 in "$envdir"/*; do
+            var2="$var2$var1\n"
+            if [ -n "$more" ]; then
+                while read var0 || [ -n "$var0" ]; do
+                    if [ ! "${var0:0:1}" = "#" ] && [ -n "$var0" ]; then
+                        var2="$var2${var0:7}\n"
+                    fi
+                done <$var1
+            fi
+            var2="$var2\n"
+        done
+        echo -e $var2
+        ;;
+    -D | --delete)
+        if [ -z "$2" ]; then
+            help
+        else
+            fileselector deletefile $envdir $2
+        fi
+        ;;
+    -as | --assign)
+        if [ -z "$2" ]; then
+            help
+        else
+            fileselector sourceenv $envdir $2
+        fi
+        ;;
+    *) help ;;
     esac
 }
 function puthis() {
@@ -143,9 +146,9 @@ function puthis() {
     fi
     # sed -i "1i\$his1" "$hisfile"
     tmpf=$(mktemp histemp.XXXXXX)
-    echo -e "$his1" > "$tmpf"
+    echo -e "$his1" >"$tmpf"
     mv "$hisfile" "$hisfile".tmp
-    cat $tmpf "$hisfile".tmp > "$hisfile"
+    cat $tmpf "$hisfile".tmp >"$hisfile"
     rm "$tmpf" "$hisfile".tmp
 
     echo -e "$his2" >"$hisseqdir/$(printf "%06d" $fsl)-his"
@@ -158,9 +161,9 @@ function putlast() {
     # else
     # echo "$1" | jq '.' > "$lastfile"
     # fi
-    echo -e "$1" > "$lastfile"
-    echo -e "$1" > "$lastfile".html
-    echo "$1" | jq '.' > "$lastfile".json
+    echo -e "$1" >"$lastfile"
+    echo -e "$1" >"$lastfile".html
+    echo "$1" | jq '.' >"$lastfile".json
 }
 
 function curlbox() {
@@ -194,6 +197,7 @@ function curlbox() {
         echo "no url"
         exit 1
     fi
+    echo $url
     local tres=$(curl 2>/dev/null "${cmd[@]}")
     putlast "$tres"
     puthis "$tres"
@@ -201,6 +205,10 @@ function curlbox() {
 
 function sourcepara() {
     source "$reqdir/$1"
+}
+
+function sourceenv() {
+    cp "$envdir/$1" "$envdir/default"
 }
 
 function dealbasic() {
@@ -258,8 +266,8 @@ function last() {
 
 function histories() {
     if [ "$1" -gt 0 ] 2>/dev/null; then
-        if [ -e "$hisdir/$(printf "%06d" $1)-his" ]; then
-            sourcepara "../histories/$(printf "%06d" $1)-his"
+        if [ -e "$hisseqdir/$(printf "%06d" $1)-his" ]; then
+            sourcepara "../histories/seq/$(printf "%06d" $1)-his"
             curlbox
         else
             echo "历史$(printf "%06d" $1)-his不存在"
@@ -312,9 +320,9 @@ else
     while [ -n "$1" ]; do
         case $1 in
         -h | --help) help ;;
-        config)
+        env)
             shift
-            configuration $@
+            enviroments $@
             shift $#
             ;;
         single)
