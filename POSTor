@@ -197,7 +197,6 @@ function curlbox() {
         echo "no url"
         exit 1
     fi
-    echo $url
     local tres=$(curl 2>/dev/null "${cmd[@]}")
     putlast "$tres"
     puthis "$tres"
