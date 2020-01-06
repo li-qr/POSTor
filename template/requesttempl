@@ -9,15 +9,15 @@
 
 
 #请求地址 （必须）
-#url="http://$address:8088/path1/path2"
+#URL="http://$address:8088/path1/path2"
 
 #方法
-#method="POST"
+#METHOD="POST"
 
 #请求头信息
-#header="content-type:application/json"
+#HEADER="content-type:application/json"
 
 #请求参数
-#request='{
+#REQUEST='{
 #"id": 1357
 #}'

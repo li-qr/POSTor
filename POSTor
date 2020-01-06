@@ -125,24 +125,24 @@ function puthis() {
     cd $currdir
     local his1="\n##$(printf "%06d" $fsl)######"$(date)"############\n"
     local his2="#!/bin/bash"
-    if [ -n "$method" ]; then
-        his1="$his1\nmethod: $method"
-        his2="$his2\nmethod=\"$method\""
+    if [ -n "$METHOD" ]; then
+        his1="$his1\nMETHOD: $METHOD"
+        his2="$his2\nMETHOD=\"$METHOD\""
     fi
-    if [ -n "$url" ]; then
-        his1="$his1\nurl: $url"
-        his2="$his2\nurl=\"$url\""
+    if [ -n "$URL" ]; then
+        his1="$his1\nURL: $URL"
+        his2="$his2\nURL=\"$URL\""
     fi
-    if [ -n "$header" ]; then
-        his1="$his1\nheader:$header"
-        his2="$his2\nheader=\"$header\""
+    if [ -n "$HEADER" ]; then
+        his1="$his1\nHEADER:$HEADER"
+        his2="$his2\nHEADER=\"$HEADER\""
     fi
-    if [ -n "$request" ]; then
-        his1="$his1\nrequest:\n$request"
-        his2="$his2\nrequest='$request'"
+    if [ -n "$REQUEST" ]; then
+        his1="$his1\nREQUEST:\n$REQUEST"
+        his2="$his2\nREQUEST='$REQUEST'"
     fi
-    if [ -n "$response"]; then
-        his1="$his1\nresponse:\n$1"
+    if [ -n "$RESPONSE"]; then
+        his1="$his1\nRESPONSE:\n$1"
     fi
     # sed -i "1i\$his1" "$hisfile"
     tmpf=$(mktemp histemp.XXXXXX)
@@ -173,26 +173,26 @@ function curlbox() {
         cmd[i]="-s"
         ((i++))
     fi
-    if [ -n "$header" ]; then
+    if [ -n "$HEADER" ]; then
         cmd[i]="-H"
         ((i++))
-        cmd[i]="$header"
+        cmd[i]="$HEADER"
         ((i++))
     fi
-    if [ -n "$method" ]; then
+    if [ -n "$METHOD" ]; then
         cmd[i]="-X"
         ((i++))
-        cmd[i]="$method"
+        cmd[i]="$METHOD"
         ((i++))
     fi
-    if [ -n "$request" ]; then
+    if [ -n "$REQUEST" ]; then
         cmd[i]="-d"
         ((i++))
-        cmd[i]="$request"
+        cmd[i]="$REQUEST"
         ((i++))
     fi
-    if [ -n "$url" ]; then
-        cmd[i]="$url"
+    if [ -n "$URL" ]; then
+        cmd[i]="$URL"
     else
         echo "no url"
         exit 1
