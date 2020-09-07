@@ -5,13 +5,13 @@ a shell post toolkit
 
 ``` shell
 POSTor env
-        -a | --add: add enviroment
-        -d | --default | -de: edit default enviroment
-        -l | --list | -lm: list enviroments
-        -D | --delete: delete enviroments
-        -as | --assign: assign enviroments for later
+        [-a | --add]: add enviroment
+        [-d | --default | -de]: edit default enviroment
+        [-l | --list | -lm]: list enviroments
+        [-D | --delete]: delete enviroments
+        [-as | --assign]: assign enviroments for later
 POSTor single
-        -s | --silent: silent request
+        [-s | --silent]: silent request
 POSTor last
         [vim|less|tail|more|cat]: open lastsfile
 POSTor his
