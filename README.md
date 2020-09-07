@@ -3,6 +3,7 @@ a shell post toolkit
 
 # 使用
 
+``` shell
 POSTor env
         -a | --add: add enviroment
         -d | --default | -de: edit default enviroment
@@ -16,3 +17,4 @@ POSTor last
 POSTor his
         n: replay the n request
         [vim|less|tail|more|cat]: open hisfile
+```
